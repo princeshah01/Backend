@@ -5,6 +5,14 @@ const bcrypt = require("bcrypt");
 
 const UserSchema = new Schema(
   {
+    interestIn: {
+      type: String,
+      enum: {
+        values: ["Male", "Female", "Non-binary"],
+        message:
+          "invalid Gender . Allowed values for Gender are Male , Female and Others",
+      },
+    },
     fullName: {
       type: String,
       required: true,
@@ -46,30 +54,30 @@ const UserSchema = new Schema(
     gender: {
       type: String,
       enum: {
-        values: ["Male", "Female", "Others"],
+        values: ["Male", "Female", "Non-binary"],
         message:
           "invalid Gender . Allowed values for Gender are Male , Female and Others",
       },
     },
     dob: {
-      type: Date,
-      validate: {
-        validator: function (value) {
-          const today = new Date();
-          const minAge = 18;
-          const BirthDate = new Date(value);
+      type: String,
+      // validate: {
+      //   validator: function (value) {
+      //     const today = new Date();
+      //     const minAge = 18;
+      //     const BirthDate = new Date(value);
 
-          if (BirthDate >= today) {
-            return false;
-          }
+      //     if (BirthDate >= today) {
+      //       return false;
+      //     }
 
-          const age = today.getFullYear() - BirthDate.getFullYear();
+      //     const age = today.getFullYear() - BirthDate.getFullYear();
 
-          return age >= minAge ? true : false;
-        },
-        message:
-          "Birth date must be in the past , and you must be an adult (i.e age >= 18 )",
-      },
+      //     return age >= minAge ? true : false;
+      //   },
+      //   message:
+      //     "Birth date must be in the past , and you must be an adult (i.e age >= 18 )",
+      // },
     },
     isVerified: {
       type: Boolean,
@@ -81,7 +89,7 @@ const UserSchema = new Schema(
     },
     bio: {
       type: String,
-      default: "This is default bio and something that describe you",
+      maxLength: 50,
     },
     profilePicture: {
       type: String,
@@ -95,10 +103,22 @@ const UserSchema = new Schema(
         message: "invalid photo url",
       },
     },
-    location: {
+    twoBestPics: {
+      type: [String],
+    },
+    locationName: {
       type: String,
       maxLength: 50,
       lowercase: true,
+    },
+    locationcoordiantes: {
+      type: {
+        type: String,
+        enum: ["Point"],
+      },
+      coordinates: {
+        type: [Number],
+      },
     },
     interest: {
       type: [String],
