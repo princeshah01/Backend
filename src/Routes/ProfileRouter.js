@@ -5,6 +5,8 @@ const User = require("../Models/User");
 
 const profileRouter = express.Router();
 
+// profile setup
+
 profileRouter.put("/profilesetup", userAuth, upload, async (req, res) => {
   try {
     console.log(req.body);
@@ -42,6 +44,40 @@ profileRouter.put("/profilesetup", userAuth, upload, async (req, res) => {
   }
 });
 
-module.exports = profileRouter;
+profileRouter.patch("/profile/edit", userAuth, upload, async (req, res) => {
+  const user = req?.user;
+  const dataToBeChanged = req.body;
+  const allowedUpdate = [
+    "fullName",
+    "gender",
+    "locationName",
+    "dob",
+    "profilePicture",
+    "bio",
+  ];
+  try {
+    for (const key in dataToBeChanged) {
+      if (!allowedUpdate.includes(key))
+        return res.status(401).json({
+          message: "your are trying to edit field which is not allowed",
+          success: false,
+        });
+    }
+    const profilePicPath = req.files.profilePicture
+      ? `/uploads/${req.files.profilePicture[0].filename}`
+      : null;
+    const existingUser = await User.findByIdAndUpdate(
+      { _id: user._id },
+      { ...user, ...dataToBeChanged }
+    );
+    existingUser.save();
+
+    console.log(req.body);
+    // console.log(user);
+    res.json(req.body);
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 module.exports = profileRouter;
