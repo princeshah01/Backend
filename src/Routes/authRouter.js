@@ -41,7 +41,7 @@ authRouter.post("/login", async (req, res) => {
       "+password"
     );
     if (!existingUser) {
-      throw new Error("Invalid credintials");
+      throw new Error("User not found");
     }
     console.dir(existingUser);
     const isPasswordVerified = await existingUser.validatePassword(

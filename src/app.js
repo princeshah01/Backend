@@ -6,6 +6,8 @@ const dbConnect = require("./dbConnection");
 const path = require("path");
 const profileRouter = require("./Routes/ProfileRouter");
 const infoRouter = require("./Routes/infoRouter");
+const requestRouter = require("./Routes/requestRouter");
+const usersRouter = require("./Routes/usersRouter");
 
 // parsing all the application/json to json
 
@@ -15,7 +17,9 @@ app.use(express.json());
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
-app.use("/", infoRouter)
+app.use("/", infoRouter);
+app.use("/", requestRouter);
+app.use("/", usersRouter);
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
 (async function () {

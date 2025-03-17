@@ -18,7 +18,7 @@ const UserSchema = new Schema(
       required: true,
       maxLength: 20,
       lowercase: true,
-      minlength: [1, "Full name cannot be empty"]
+      minlength: [1, "Full name cannot be empty"],
     },
 
     userName: {
@@ -62,23 +62,11 @@ const UserSchema = new Schema(
     },
     dob: {
       type: String,
-      // validate: {
-      //   validator: function (value) {
-      //     const today = new Date();
-      //     const minAge = 18;
-      //     const BirthDate = new Date(value);
-
-      //     if (BirthDate >= today) {
-      //       return false;
-      //     }
-
-      //     const age = today.getFullYear() - BirthDate.getFullYear();
-
-      //     return age >= minAge ? true : false;
-      //   },
-      //   message:
-      //     "Birth date must be in the past , and you must be an adult (i.e age >= 18 )",
-      // },
+    },
+    age: {
+      type: Number,
+      min: [18, "Age must be at least 18."],
+      max: [99, "Age cannot be more than 99."],
     },
     isVerified: {
       type: Boolean,
@@ -109,7 +97,7 @@ const UserSchema = new Schema(
     },
     locationName: {
       type: String,
-      maxLength: 50,
+      maxLength: 100,
       lowercase: true,
     },
     locationcoordiantes: {
