@@ -18,7 +18,7 @@ const userAuth = async (req, res, next) => {
     next();
   } catch (err) {
     console.log(err + " userAuth ka error");
-    res.status(400).json({ msg: err.msg, success: false });
+    res.status(400).json({ message: err.msg || "authentication error ", success: false });
   }
 };
 

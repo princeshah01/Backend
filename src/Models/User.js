@@ -18,6 +18,7 @@ const UserSchema = new Schema(
       required: true,
       maxLength: 20,
       lowercase: true,
+      minlength: [1, "Full name cannot be empty"]
     },
 
     userName: {
