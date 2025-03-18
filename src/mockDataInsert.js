@@ -1,113 +1,63 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const axios = require("axios");
 const User = require("./Models/User"); // Adjust path accordingly
 
-const usersData = [
-  {
-    interestIn: "Female",
-    fullName: "john doe",
-    userName: "johndoe123",
-    email: "johndoe@example.com",
-    password: "password123",
-    gender: "Male",
-    dob: "1995-06-15",
-    isVerified: true,
-    isProfileSetup: true,
-    bio: "Love to explore new places.",
-    profilePicture: "https://example.com/profile1.jpg",
-    twoBestPics: [
-      "https://example.com/pic1.jpg",
-      "https://example.com/pic2.jpg",
-    ],
-    locationName: "New York",
-    locationcoordiantes: { type: "Point", coordinates: [-74.006, 40.7128] },
-    interest: ["travel", "music", "fitness"],
-    matches: [],
-    isPremiumUser: false,
-    lastActive: new Date(),
-  },
-  {
-    interestIn: "Male",
-    fullName: "jane smith",
-    userName: "janesmith456",
-    email: "janesmith@example.com",
-    password: "password456",
-    gender: "Female",
-    dob: "1998-09-22",
-    isVerified: false,
-    isProfileSetup: false,
-    bio: "Book lover and coffee addict ☕.",
-    profilePicture: "https://example.com/profile2.jpg",
-    twoBestPics: [
-      "https://example.com/pic3.jpg",
-      "https://example.com/pic4.jpg",
-    ],
-    locationName: "Los Angeles",
-    locationcoordiantes: { type: "Point", coordinates: [-118.2437, 34.0522] },
-    interest: ["reading", "cooking", "hiking"],
-    matches: [],
-    isPremiumUser: true,
-    lastActive: new Date(),
-  },
-  {
-    interestIn: "Non-binary",
-    fullName: "alex taylor",
-    userName: "alextaylor789",
-    email: "alextaylor@example.com",
-    password: "password789",
-    gender: "Non-binary",
-    dob: "2000-01-10",
-    isVerified: true,
-    isProfileSetup: true,
-    bio: "Tech enthusiast 🚀",
-    profilePicture: "https://example.com/profile3.jpg",
-    twoBestPics: [
-      "https://example.com/pic5.jpg",
-      "https://example.com/pic6.jpg",
-    ],
-    locationName: "San Francisco",
-    locationcoordiantes: { type: "Point", coordinates: [-122.4194, 37.7749] },
-    interest: ["coding", "gaming", "travel"],
-    matches: [],
-    isPremiumUser: false,
-    lastActive: new Date(),
-  },
-];
+const RANDOM_USER_API = "https://randomuser.me/api/?results=5"; // Fetch 10 users
 
-// Generate 7 more users dynamically
-for (let i = 4; i <= 10; i++) {
-  usersData.push({
-    interestIn: ["Male", "Female", "Non-binary"][Math.floor(Math.random() * 3)],
-    fullName: `User ${i}`,
-    userName: `user${i}`,
-    email: `user${i}@example.com`,
-    password: `123456789@Pr`,
-    gender: ["Male", "Female", "Non-binary"][Math.floor(Math.random() * 3)],
-    dob: `199${Math.floor(Math.random() * 10)}-0${
-      Math.floor(Math.random() * 9) + 1
-    }-1${Math.floor(Math.random() * 9)}`,
-    isVerified: Math.random() < 0.5,
-    isProfileSetup: Math.random() < 0.5,
-    bio: "This is a randomly generated user.",
-    profilePicture: "https://example.com/default.jpg",
-    twoBestPics: [
-      "https://example.com/random1.jpg",
-      "https://example.com/random2.jpg",
-    ],
-    locationName: "Random City",
-    locationcoordiantes: {
-      type: "Point",
-      coordinates: [Math.random() * 180 - 90, Math.random() * 180 - 90],
-    },
-    interest: ["music", "sports", "reading"],
-    matches: [],
-    isPremiumUser: Math.random() < 0.3,
-    lastActive: new Date(),
-  });
-}
+// Function to fetch random users
+const fetchRandomUsers = async () => {
+  try {
+    const response = await axios.get(RANDOM_USER_API);
+    return response.data.results;
+  } catch (error) {
+    console.error("❌ Error fetching users:", error);
+    return [];
+  }
+};
 
-// Function to seed users
+// Function to format users for MongoDB
+const formatUsers = async (users) => {
+  const formattedUsers = [];
+
+  for (let user of users) {
+    const hashedPassword = await bcrypt.hash("123456789@Pr", 10); // Default password for all users
+
+    formattedUsers.push({
+      interestIn: ["Male", "Female", "Non-binary"][
+        Math.floor(Math.random() * 3)
+      ],
+      fullName: `${user.name.first} ${user.name.last}`,
+      userName: user.login.username,
+      email: user.email,
+      password: hashedPassword,
+      gender: user.gender.charAt(0).toUpperCase() + user.gender.slice(1), // Capitalize gender
+      dob: user.dob.date.split("T")[0], // Extract YYYY-MM-DD
+      isVerified: Math.random() < 0.5,
+      isProfileSetup: Math.random() < 0.5,
+      bio: "Generated via RandomUser API.",
+      profilePicture: user.picture.large,
+      twoBestPics: [user.picture.medium, user.picture.thumbnail],
+      locationName: `${user.location.city}, ${user.location.country}`,
+      locationcoordiantes: {
+        type: "Point",
+        coordinates: [
+          user.location.coordinates.longitude,
+          user.location.coordinates.latitude,
+        ],
+      },
+      interest: ["music", "sports", "reading"],
+      matches: [],
+      isPremiumUser: Math.random() < 0.3,
+      lastActive: new Date(),
+    });
+  }
+
+  return formattedUsers;
+};
+
+// Function to seed users into MongoDB
 const seedUsers = async () => {
   try {
     await mongoose.connect("mongodb://localhost:27017/DatingApp", {
@@ -116,13 +66,18 @@ const seedUsers = async () => {
     });
     console.log("📡 Connected to MongoDB");
 
-    // Hash passwords before inserting
-    for (let user of usersData) {
-      user.password = await bcrypt.hash(user.password, 10);
+    const randomUsers = await fetchRandomUsers();
+    if (randomUsers.length === 0) {
+      console.log("❌ No users fetched. Exiting.");
+      mongoose.connection.close();
+      return;
     }
 
-    await User.insertMany(usersData);
-    console.log("✅ 10 Users Inserted Successfully");
+    const formattedUsers = await formatUsers(randomUsers);
+
+    await User.insertMany(formattedUsers);
+    console.log("✅ Random Users Inserted Successfully");
+
     mongoose.connection.close();
   } catch (error) {
     console.error("❌ Error inserting users:", error);

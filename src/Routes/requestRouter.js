@@ -59,6 +59,7 @@ requestRouter.post(
   "/request/review/:status/:requestId",
   userAuth,
   async (req, res) => {
+    console.log(req.user.fullName);
     try {
       const { status, requestId } = req?.params;
       const loggedInUser = req.user;
@@ -78,17 +79,6 @@ requestRouter.post(
 
       // saving the matched user data to user object
 
-      if (status === "accepted") {
-        const loggedUserData = await User.findById({ _id: loggedInUser._id });
-        const fromUserData = await User.findById(connectionReq.fromUserId);
-        if (!loggedUserData.matches.includes(connectionReq.fromUserId)) {
-          loggedUserData.matches.push(connectionReq.fromUserId);
-          fromUserData.matches.push(connectionReq.toUserId);
-          await loggedUserData.save();
-          await fromUserData.save();
-        }
-      }
-
       const updatedConnectionReq = await connectionReq.save();
 
       res.status(200).json({
@@ -102,5 +92,47 @@ requestRouter.post(
     }
   }
 );
+
+//api for adding to fav
+
+requestRouter.post("/user/:connectionId/:isFav", userAuth, async (req, res) => {
+  console.log(req.params.isFav);
+  try {
+    const connectionId = req.params.connectionId;
+    const isFav = req.params.isFav === "true";
+
+    if (!connectionId || connectionId.length !== 24) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or missing connectionId",
+      });
+    }
+
+    const updatedRequest = await ConnectionRequest.findByIdAndUpdate(
+      connectionId,
+      { isfav: isFav },
+      { new: true }
+    );
+
+    if (!updatedRequest) {
+      return res.status(404).json({
+        success: false,
+        message: "Connection request not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Favorite status updated successfully",
+      data: updatedRequest,
+    });
+  } catch (error) {
+    console.error("Error :", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
 
 module.exports = requestRouter;

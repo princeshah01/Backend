@@ -45,9 +45,19 @@ usersRouter.get("/user/connections", userAuth, async (req, res) => {
 
     const data = connectionRequests.map((row) => {
       if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
-        return row.toUserId;
+        const data = {
+          _id: row._id,
+          data: row.toUserId,
+          isfav: row.isfav,
+        };
+        return data;
       }
-      return row.fromUserId;
+      const data = {
+        _id: row._id,
+        data: row.fromUserId,
+        isfav: row.isfav,
+      };
+      return data;
     });
 
     res.status(200).json({ data, success: true });
@@ -56,15 +66,16 @@ usersRouter.get("/user/connections", userAuth, async (req, res) => {
   }
 });
 
-usersRouter.get("/feed", userAuth, async (req, res) => {
+usersRouter.get("/feed/:page", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
 
-    // const page = parseInt(req.params.page) || 1;
-    // let limit = 5;
+    const page = parseInt(req.params.page) || 1;
+    let limit = 5;
     // const skip = (page - 1) * limit;
     // console.log(skip);
-    // console.log(page);
+    console.log(page);
+    /// instead of getting page we can get the lastuserId from feed and can do cursor based pagination and select user  after the last userId that we got from  frontend
 
     const connectionRequests = await ConnectionRequest.find({
       $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
@@ -81,9 +92,10 @@ usersRouter.get("/feed", userAuth, async (req, res) => {
         { _id: { $nin: Array.from(hideUsersFromFeed) } },
         { _id: { $ne: loggedInUser._id } },
       ],
-    }).select(USER_SAFE_DATA);
-    // .skip(skip)
-    // .limit(limit);
+    })
+      .select(USER_SAFE_DATA)
+      .limit(limit);
+    // const finalFeedData = users.slice(0, limit);
     console.log(users.length);
     res.status(200).json({ data: users });
   } catch (err) {
