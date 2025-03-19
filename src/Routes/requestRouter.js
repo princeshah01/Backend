@@ -97,6 +97,7 @@ requestRouter.post(
 
 requestRouter.post("/user/:connectionId/:isFav", userAuth, async (req, res) => {
   console.log(req.params.isFav);
+  const { fullName } = req.body;
   try {
     const connectionId = req.params.connectionId;
     const isFav = req.params.isFav === "true";
@@ -123,8 +124,8 @@ requestRouter.post("/user/:connectionId/:isFav", userAuth, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Favorite status updated successfully",
-      data: updatedRequest,
+      message: updatedRequest.isfav == true ? `${fullName} is added to favourite list` : `${fullName} is removed from favorite List`,
+
     });
   } catch (error) {
     console.error("Error :", error);
