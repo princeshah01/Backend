@@ -54,11 +54,11 @@ const UserSchema = new Schema(
     },
     gender: {
       type: String,
-      enum: {
-        values: ["Male", "Female", "Non-binary"],
-        message:
-          "invalid Gender . Allowed values for Gender are Male , Female and Others",
-      },
+      // enum: {
+      //   values: ["Male", "Female", "Non-binary"],
+      //   message:
+      //     "invalid Gender . Allowed values for Gender are Male , Female and Others",
+      // },
     },
     dob: {
       type: String,

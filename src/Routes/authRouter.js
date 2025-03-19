@@ -2,8 +2,11 @@ const express = require("express");
 const { validateSignUp, ValidateLogin } = require("../helper/Validator");
 const User = require("../Models/User");
 const bcrypt = require("bcrypt");
-
+const generateOtp = require("../helper/generateOtp");
 const authRouter = express.Router();
+const OTP = require("../Models/Otp");
+const mailSender = require("../helper/mailSender");
+const { enable } = require("express/lib/application");
 
 // signup
 
@@ -17,12 +20,18 @@ authRouter.post("/signup", async (req, res) => {
       throw new Error("user already exist with this email");
     }
     userInfo.password = await bcrypt.hash(userInfo.password, 10);
+    const otp = generateOtp();
+    const Otp = new OTP({ email: userInfo.email, otp });
+    await Otp.save();
+    // enable mailsender
+    // mailSender(userInfo.email, otp);
 
+    console.log(" ~ authRouter.post ~ otp:", otp);
     const newUser = new User(userInfo);
     await newUser.save();
     return res.status(200).json({
       success: true,
-      message: `User registered successfully Now Login And Setup your Profile to Make connections & make sure to click on link we have sent on ${userInfo.email} to get Verified !`,
+      message: `OTP has been sent to ${newUser.email}`,
     });
   } catch (error) {
     // console.log(error);
@@ -31,6 +40,59 @@ authRouter.post("/signup", async (req, res) => {
 });
 
 //login
+
+authRouter.post("/send-otp", async (req, res) => {
+  const { email } = req.body;
+  const otp = generateOtp();
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      res
+        .status(400)
+        .json({ message: "user not found with this email", success: false });
+      return;
+    }
+    await OTP.deleteOne({ email });
+    const newOtp = new OTP({ email, otp });
+    await newOtp.save();
+    // send email here
+    console.log("~ authRouter.post ~ otp:", otp);
+    res.status(200).json({ success: true, message: "OTP Sent successfully" });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ success: false, message: err.message || "server Error" });
+  }
+});
+authRouter.post("/verify-otp", async (req, res) => {
+  const { email, otp } = req.body;
+  console.log(email, otp);
+  try {
+    if (!email && !otp) {
+      return res.status(400).json({ message: "no OTP entered" });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "user not found" });
+    }
+    const existingOtp = await OTP.findOne({ email });
+
+    console.log("🚀 ~ authRouter.post ~ existingOtp:", existingOtp);
+    if (!existingOtp) {
+      return res.status(400).json({ message: "OTP expired or Not Found" });
+    }
+
+    if (existingOtp.otp !== otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+    user.isVerified = true;
+    await user.save();
+    return res.status(200).json({ message: "OTP verified Done" });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({ message: err.message || "server Error" });
+  }
+});
 
 authRouter.post("/login", async (req, res) => {
   const userInfo = req.body;
