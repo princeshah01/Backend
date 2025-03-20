@@ -65,8 +65,8 @@ const UserSchema = new Schema(
     },
     age: {
       type: Number,
-      min: [18, "Age must be at least 18."],
-      max: [99, "Age cannot be more than 99."],
+      // min: [18, "Age must be at least 18."],
+      // max: [99, "Age cannot be more than 99."],
     },
     isVerified: {
       type: Boolean,
@@ -84,13 +84,13 @@ const UserSchema = new Schema(
       type: String,
       default:
         "https://prince.info.np/static/media/prince.71204db128ccdbebba5c.png",
-      validate: {
-        validator: function (value) {
-          const imageExtensions = /\.(jpg|jpeg|png|gif|webp)$/i;
-          return imageExtensions.test(value) && validator.isURL(value);
-        },
-        message: "invalid photo url",
-      },
+      // validate: {
+      //   validator: function (value) {
+      //     const imageExtensions = /\.(jpg|jpeg|png|gif|webp)$/i;
+      //     return imageExtensions.test(value) && validator.isURL(value);
+      //   },
+      //   message: "invalid photo url",
+      // },
     },
     twoBestPics: {
       type: [String],

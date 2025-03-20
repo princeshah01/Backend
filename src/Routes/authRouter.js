@@ -24,7 +24,7 @@ authRouter.post("/signup", async (req, res) => {
     const Otp = new OTP({ email: userInfo.email, otp });
     await Otp.save();
     // enable mailsender
-    // mailSender(userInfo.email, otp);
+    mailSender(userInfo.email, otp);
 
     console.log(" ~ authRouter.post ~ otp:", otp);
     const newUser = new User(userInfo);
@@ -55,6 +55,8 @@ authRouter.post("/send-otp", async (req, res) => {
     await OTP.deleteOne({ email });
     const newOtp = new OTP({ email, otp });
     await newOtp.save();
+    mailSender(newOtp.email, newOtp.otp);
+
     // send email here
     console.log("~ authRouter.post ~ otp:", otp);
     res.status(200).json({ success: true, message: "OTP Sent successfully" });
@@ -64,6 +66,9 @@ authRouter.post("/send-otp", async (req, res) => {
       .json({ success: false, message: err.message || "server Error" });
   }
 });
+
+//otp verify
+
 authRouter.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
   console.log(email, otp);
