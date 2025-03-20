@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const axios = require("axios");
 const User = require("./Models/User"); // Adjust path accordingly
 
-const RANDOM_USER_API = "https://randomuser.me/api/?results=5"; // Fetch 10 users
+const RANDOM_USER_API = "https://randomuser.me/api/?results=1"; // Fetch 10 users
 
 // Function to fetch random users
 const fetchRandomUsers = async () => {
@@ -35,7 +35,7 @@ const formatUsers = async (users) => {
       gender: user.gender.charAt(0).toUpperCase() + user.gender.slice(1), // Capitalize gender
       dob: user.dob.date.split("T")[0], // Extract YYYY-MM-DD
       isVerified: Math.random() < 0.5,
-      isProfileSetup: Math.random() < 0.5,
+      isProfileSetup: true,
       bio: "Generated via RandomUser API.",
       profilePicture: user.picture.large,
       twoBestPics: [user.picture.medium, user.picture.thumbnail],
@@ -49,6 +49,7 @@ const formatUsers = async (users) => {
       },
       interest: ["music", "sports", "reading"],
       matches: [],
+      age: Math.floor(Math.random() * 36) + 5,
       isPremiumUser: Math.random() < 0.3,
       lastActive: new Date(),
     });
