@@ -58,7 +58,7 @@ usersRouter.get("/user/connections", userAuth, async (req, res) => {
       return data;
     });
 
-    res.status(200).json({ data, success: true });
+    res.status(201).json({ data, success: true });
   } catch (err) {
     res.status(400).send({ message: err.message, success: false });
   }

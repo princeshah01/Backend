@@ -137,6 +137,7 @@ infoRouter.get("/helphistory", userAuth, async (req, res) => {
         success: true,
         message: "Successfully retrived previous Issue raised",
       });
+      return;
     }
     res.status(404).json({ message: "No History Found", success: false });
   } catch (error) {

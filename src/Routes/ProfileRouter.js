@@ -69,16 +69,22 @@ profileRouter.patch("/profile/edit", userAuth, upload, async (req, res) => {
           success: false,
         });
     }
-    const profilePicPath = req.files.profilePicture
-      ? `/uploads/${req.files.profilePicture[0].filename}`
-      : null;
+    const profilePicPath = `${process.env.API_BASE_URI}/uploads/${req.files.profilePicture[0].filename}`;
+    if (profilePicPath) {
+      dataToBeChanged.profilePicture = profilePicPath;
+    }
+    console.log("🚀 ~ profileRouter.patch ~ dataToBeChanged:", dataToBeChanged);
+
     const existingUser = await User.findByIdAndUpdate(
       { _id: user._id },
-      { ...user, ...dataToBeChanged }
+      { ...dataToBeChanged },
+      {
+        new: true,
+      }
     );
     existingUser.save();
 
-    console.log(req.body);
+    console.log(existingUser);
     // console.log(user);
     res.json(req.body);
   } catch (error) {

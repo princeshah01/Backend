@@ -8,7 +8,7 @@ const profileRouter = require("./Routes/ProfileRouter");
 const infoRouter = require("./Routes/infoRouter");
 const requestRouter = require("./Routes/requestRouter");
 const usersRouter = require("./Routes/usersRouter");
-
+const chatRouter = require("./Routes/chatRouter");
 // parsing all the application/json to json
 
 app.use(express.json());
@@ -20,6 +20,7 @@ app.use("/", profileRouter);
 app.use("/", infoRouter);
 app.use("/", requestRouter);
 app.use("/", usersRouter);
+app.use("/", chatRouter);
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
 (async function () {
