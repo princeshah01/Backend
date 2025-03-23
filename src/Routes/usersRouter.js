@@ -30,8 +30,8 @@ usersRouter.get("/user/requests/received", userAuth, async (req, res) => {
 //all connection
 usersRouter.get("/user/connections", userAuth, async (req, res) => {
   try {
+    // throw new Error("Error hhui hui hui ")
     const loggedInUser = req.user;
-
     const connectionRequests = await ConnectionRequest.find({
       $or: [
         { toUserId: loggedInUser._id, status: "accepted" },
@@ -58,7 +58,7 @@ usersRouter.get("/user/connections", userAuth, async (req, res) => {
       return data;
     });
 
-    res.status(201).json({ data, success: true });
+    res.status(200).json({ data, success: true });
   } catch (err) {
     res.status(400).send({ message: err.message, success: false });
   }
