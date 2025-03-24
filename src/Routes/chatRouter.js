@@ -54,4 +54,32 @@ chatRouter.get("/join-global-chat", userAuth, async (req, res) => {
   }
 })
 
+
+chatRouter.get("/user/channels", userAuth, async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+
+    // Query Stream Chat for channels where the user is a member
+    const channels = await serverClient.queryChannels(
+      { members: { $in: [userId] } }, // Filters only channels the user is in
+      { last_message_at: -1 }, // Sort by last message time
+      { watch: true, state: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      channels: channels.map(channel => ({
+        id: channel.id,
+        name: channel.data.name,
+        members: channel.state.members,
+        lastMessage: channel.state.messages[channel.state.messages.length - 1] || "something",
+      })),
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+
 module.exports = chatRouter;
