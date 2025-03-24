@@ -2,7 +2,7 @@ const express = require("express");
 const userAuth = require("../Middleware/userAuth");
 const ConnectionRequest = require("../Models/Connection");
 const User = require("../Models/User");
-
+const CreatePrivateChat = require("../helper/CreatePrivateChat")
 const requestRouter = express.Router();
 
 // api for sending request
@@ -74,6 +74,11 @@ requestRouter.post(
       });
       if (!connectionReq) {
         throw new Error("Connection Request doesn't Exist");
+      }
+      const anotherUser = await User.findOne({ _id: connectionReq.fromUserId })
+      if (status === "accepted") {
+        console.log("add both of the user to do chating")
+        CreatePrivateChat(loggedInUser, anotherUser)
       }
       connectionReq.status = status;
 
