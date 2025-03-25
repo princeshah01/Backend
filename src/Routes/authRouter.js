@@ -6,8 +6,8 @@ const generateOtp = require("../helper/generateOtp");
 const authRouter = express.Router();
 const OTP = require("../Models/Otp");
 const mailSender = require("../helper/mailSender");
-const { enable } = require("express/lib/application");
-
+const { encode: btoa } = require("base-64");
+const { generateToken } = require("../helper/CreatePrivateChat");
 // signup
 
 authRouter.post("/signup", async (req, res) => {
@@ -121,12 +121,17 @@ authRouter.post("/login", async (req, res) => {
     delete response.password;
     const token = await existingUser.getJWT();
     console.log(token);
+    const chatToken = await generateToken(existingUser);
     res.cookie("token", token);
     res.status(200).json({
       success: true,
       msg: "login Successfully",
       user: response,
       token: token,
+      chatToken,
+      streamApiKey: btoa(
+        process.env.STREAM_CHAT_API + process.env.ENCODE_SECRET
+      ),
     });
   } catch (err) {
     return res.status(400).json({ success: false, error: err.message });

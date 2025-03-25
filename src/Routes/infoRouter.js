@@ -1,7 +1,6 @@
 const express = require("express");
 const userAuth = require("../Middleware/userAuth");
 const Issue = require("../Models/Issue");
-
 const infoRouter = express.Router();
 
 const faqData = [
@@ -118,11 +117,14 @@ infoRouter.post("/support", userAuth, async (req, res) => {
 //issueType list
 infoRouter.get("/issueType", async (_, res) => {
   try {
-    return res.status(200).json({ success: true, data: [...issueType] });
+    return res.status(200).json({
+      success: true,
+      data: [...issueType],
+    });
   } catch (error) {
-    return res
-      .status(400)
-      .json({ message: error.message || "someThing Went wrong" });
+    return res.status(400).json({
+      message: error.message || "someThing Went wrong",
+    });
   }
 });
 

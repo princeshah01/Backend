@@ -2,8 +2,9 @@ const express = require("express");
 const upload = require("../Middleware/uploads");
 const userAuth = require("../Middleware/userAuth");
 const User = require("../Models/User");
-
+const { generateToken } = require("../helper/CreatePrivateChat");
 const profileRouter = express.Router();
+const { encode: btoa } = require("base-64");
 
 // profile setup
 
@@ -98,7 +99,16 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
     const { user } = req;
     // console.log(user) ;
-    res.send(user);
+    chatToken = await generateToken(user);
+    streamChatApi = btoa(
+      process.env.STREAM_CHAT_API + process.env.ENCODE_SECRET
+    );
+    res.status(200).json({
+      user,
+      chatToken: chatToken,
+      message: "details fetched done",
+      success: true,
+    });
   } catch (err) {
     res.status(400).json({ sucess: false, message: err.message });
   }
