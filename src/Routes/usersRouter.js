@@ -4,6 +4,7 @@ const usersRouter = express.Router();
 const userAuth = require("../Middleware/userAuth");
 const ConnectionRequest = require("../Models/Connection");
 const User = require("../Models/User");
+const { getChannels } = require("../helper/CreatePrivateChat");
 
 const USER_SAFE_DATA =
   "fullName userName interestIn dob age gender isVerified bio profilePicture twoBestPics locationName interest";
@@ -41,8 +42,6 @@ usersRouter.get("/user/connections", userAuth, async (req, res) => {
       .populate("fromUserId", USER_SAFE_DATA)
       .populate("toUserId", USER_SAFE_DATA);
 
-    console.log(connectionRequests);
-
     const data = connectionRequests.map((row) => {
       if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
         const data = {
@@ -55,9 +54,13 @@ usersRouter.get("/user/connections", userAuth, async (req, res) => {
         _id: row._id,
         userInfo: { ...row.fromUserId._doc, isfav: row.isfav },
       };
+
       return data;
     });
-
+    data.map((connection, idx) => {
+      getChannels(connection._id);
+    });
+    // console.log(data);
     res.status(200).json({ data, success: true });
   } catch (err) {
     res.status(400).send({ message: err.message, success: false });

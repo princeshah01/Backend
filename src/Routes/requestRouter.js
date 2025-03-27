@@ -78,7 +78,7 @@ requestRouter.post(
       const anotherUser = await User.findOne({ _id: connectionReq.fromUserId });
       if (status === "accepted") {
         console.log("add both of the user to do chating");
-        CreatePrivateChat(loggedInUser, anotherUser);
+        CreatePrivateChat(loggedInUser, anotherUser, connectionReq._id);
       }
       connectionReq.status = status;
 
