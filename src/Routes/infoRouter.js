@@ -67,13 +67,11 @@ issueType = [
   "Report Abuse/Spam",
   "Chat/Messaging Issues",
   "Friend Request Issues",
-  "Privacy Settings Issue",
   "Location Issues",
   "Verification Issues",
   "Notification Issues",
   "Profile Update Issue",
   "Bug Report",
-  "Feature Request",
   "Account Issues",
   "Payment Issues",
 ];
